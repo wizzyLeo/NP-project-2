@@ -3,12 +3,12 @@ CXX = g++
 CXXFLAGS = -Wall -g -std=c++17
 
 # Executable name
-TARGET = npshell
+TARGET = main
 
 # Source files
-SRCS = npshell.cpp Parser.cpp IOManager.cpp Shell.cpp CommandExecutor.cpp
+SRCS = main.cpp Parser.cpp IOManager.cpp Shell.cpp CommandExecutor.cpp Server.cpp
 
-HEADERS = Parser.h IOManager.h Shell.h CommandExecutor.h
+HEADERS = Parser.h IOManager.h Shell.h CommandExecutor.h Server.h
 
 # Object files (replace .cpp with .o)
 OBJS = $(SRCS:.cpp=.o)

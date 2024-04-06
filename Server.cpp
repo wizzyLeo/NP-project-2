@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "Shell.h"
 
 Server::Server():serverPort(PORT){;}
 
@@ -11,7 +12,7 @@ void Server::createSocket(){
 
 void Server::setServerAddrAndPort(){
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    inet_aton("127.0.0.1", &serverAddr.sin_addr);
     serverAddr.sin_port = htons(serverPort);
 }
 
@@ -43,18 +44,24 @@ void Server::startAccepting(){
             continue; // continue accepting other connections
         }
 
-        processRequest(clientSocket);
+        // spawn a new thread to process the request
+        pid_t pid;
+        if((pid = fork()) < 0){
+            perror("Fork failed");
+            exit(EXIT_FAILURE);
+        }else if(pid == 0){
+            // child process
+            // handle the request
+            close(serverSocket); // Close the server socket in the child process
+            processRequest(clientSocket);
+        }
         close(clientSocket); // Close the client socket after processing
     }
 }
 
 void Server::processRequest(int clientSocket){
-    char buffer[1024] = {0};
-    int valread;
-    valread = read(clientSocket, buffer, 1024);
-    std::cout << "Message from client: " << buffer << std::endl;
-    send(clientSocket, buffer, strlen(buffer), 0);
-    std::cout << "Message sent to client" << std::endl;
+    Shell shell(clientSocket);
+    shell.run();
 }
 
 void Server::start(){

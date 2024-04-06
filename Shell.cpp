@@ -1,6 +1,6 @@
 #include"Shell.h"
 
-Shell::Shell(){;}
+Shell::Shell(int clientFd): input_fd(clientFd){;}
 
 bool Shell::isPipedIn(){
     return pipeCounter.count(0);
@@ -59,7 +59,7 @@ void Shell::run(){
     while(true){
         std::string input;
         std::vector<std::string> tokens;
-        input = IOManager::getInput();
+        input = IOManager::getInput(input_fd);
         tokens = Parser::getTokenizedLine(input);
 
         std::vector<std::string> argsOfCurrentCommand;

@@ -18,6 +18,7 @@
 
 
 class Shell{
+    int input_fd;
     CommandExecutor cmdExec;
     std::unordered_map<int, std::array<int, 2> > pipeCounter;
     std::unordered_map<int, std::string> testPipeCounter;
@@ -31,7 +32,7 @@ class Shell{
     void agePipeCounter();
     void setCommandIO(command_t& , int, std::string);
 public:
-    Shell();
+    Shell(int);
     void run();
 };
 
