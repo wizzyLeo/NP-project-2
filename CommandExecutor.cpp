@@ -1,5 +1,7 @@
 #include "CommandExecutor.h"
 
+CommandExecutor::CommandExecutor(int clientFd): input_fd(clientFd) {;}
+
 
 void CommandExecutor::setupChildIO(command_t& cmd){
     if(cmd.pipe[0] != STDIN_FILENO){
@@ -18,6 +20,7 @@ void CommandExecutor::setupChildIO(command_t& cmd){
 
 void CommandExecutor::execute(command_t &cmd) {
   if (cmd.args[0] == "exit") {
+    close(input_fd);
     exit(0);
   }
 

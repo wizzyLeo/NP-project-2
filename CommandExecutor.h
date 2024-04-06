@@ -22,6 +22,8 @@ typedef struct command_t {
 
 
 class CommandExecutor{
+    int input_fd;
+
     bool isRedirectingToFile(command_t cmd);
     bool isEndOfCommand(command_t cmd);
     bool isUsingPipe(command_t cmd);
@@ -30,6 +32,7 @@ class CommandExecutor{
     void executeCommand(const command_t& cmd);
     void cleanArgsMemory(char** args, const command_t& cmd);
 public:
+    CommandExecutor(int);
     void execute(command_t& cmd);
 };
 

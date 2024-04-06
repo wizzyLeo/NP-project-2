@@ -11,6 +11,7 @@ void Server::createSocket(){
 }
 
 void Server::setServerAddrAndPort(){
+    bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     inet_aton("127.0.0.1", &serverAddr.sin_addr);
     serverAddr.sin_port = htons(serverPort);
@@ -37,6 +38,9 @@ void Server::startAccepting(){
     int clientSocket;
     struct sockaddr_in clientAddr;
     int clientAddrLen = sizeof(clientAddr);
+
+    signal(SIGCHLD, SIG_IGN); // ignore child signals (zombies
+
     while(true){
         clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, (socklen_t*)&clientAddrLen);
         if(clientSocket < 0){
@@ -54,8 +58,11 @@ void Server::startAccepting(){
             // handle the request
             close(serverSocket); // Close the server socket in the child process
             processRequest(clientSocket);
+            close(clientSocket);
+            exit(0);
+        }else{
+            close(clientSocket); // Close the client socket after processing
         }
-        close(clientSocket); // Close the client socket after processing
     }
 }
 
