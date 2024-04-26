@@ -17,6 +17,7 @@ public:
     static bool isPipeUpdatingCounter(std::string);
     static int getPipeNumber(std::string);
     static int getPipeTo(std::string);
+    static int getUserPipeReceicer(std::string);
 };
 
 #endif

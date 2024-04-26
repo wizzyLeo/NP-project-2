@@ -32,6 +32,9 @@ bool Parser::isPipeUpdatingCounter(std::string arg){
 bool Parser::isNumberPipe(std::string argPipe){
     return argPipe.size() > 1;
 }
+int Parser::getUserPipeReceicer(std::string argPipe){
+    return stoi(argPipe.substr(1));
+}
 
 int Parser::getPipeNumber(std::string arg){
     return std::stoi(arg.substr(1));
