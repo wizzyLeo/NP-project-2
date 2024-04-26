@@ -1,40 +1,36 @@
-#ifndef SHELL_H
-#define SHELL_H
+#ifndef SERVER_H
+#define SERVER_H
 
-#include<iostream>
-#include<sstream>
-#include<vector>
-#include<array>
-#include<stdio.h>
-#include<unistd.h>
-#include<unordered_map>
-#include<fcntl.h>
-#include<string>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unordered_map>
+#include "Shell.h"
 
-#include"IOManager.h"
-#include"Parser.h"
-#include"CommandExecutor.h"
+#define PORT 7001
 
+class Server {
+private:
+    int serverSocket;
+    struct sockaddr_in serverAddr;
+    int serverPort = PORT;
+    fd_set master_fds, working_fds; // fd_set for select()
 
+    void createSocket();
+    void setServerAddrAndPort();
+    void bindSocket();
+    void startListening();
+    void handleNewConnection();
+    void processRequest(int clientSocket);
+    void broadcastMessage(const std::string& message);
 
-class Shell{
-    int input_fd;
-    CommandExecutor cmdExec;
-    std::unordered_map<int, std::array<int, 2> > pipeCounter;
-    std::unordered_map<int, std::string> testPipeCounter;
-
-    bool isPipedIn();
-    void registerNumberPipe(int);
-    void setCommandPipe(command_t& cmd);
-    void setRedirectFile(command_t& cmd, std::string fileName);
-    void setupEnviroment();
-    
-    void agePipeCounter();
-    void setCommandIO(command_t& , int, std::string);
 public:
-    Shell(int);
-    void run();
+    Server(int port = PORT);
+    void start();
+    ~Server();
 };
 
-
-#endif 
+#endif // SERVER_H
