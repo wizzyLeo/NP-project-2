@@ -3,6 +3,8 @@
 #include<iostream>
 #include<string>
 #include<unistd.h>
+#include<fcntl.h>
+#include <sys/socket.h>
 
 class IOManager{
 public:

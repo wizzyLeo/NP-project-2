@@ -11,6 +11,7 @@
 #include <functional> 
 
 typedef struct command_t {
+    int sender_id;
     std::vector<std::string> args;
     std::array<int, 2> pipe = {STDIN_FILENO, STDOUT_FILENO};
     int fd_out = STDOUT_FILENO;

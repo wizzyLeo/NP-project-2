@@ -1,17 +1,16 @@
 #include "IOManager.h"
 
-std::string IOManager::getInput(int input_fd){
-    std::string input;
-    char buffer[1024];
-
-    const char* prompt = "% ";
-    write(input_fd, prompt, strlen(prompt));
-
-    ssize_t n = read(input_fd, buffer, sizeof(buffer) - 1);
-    if(n > 0){
-        buffer[n] = '\0';
-        input = std::string(buffer);
+std::string IOManager::getInput(int input_fd) {
+    std::string line;
+    char recv_buf[1];
+    while (recv(input_fd, recv_buf, 1, 0)) {
+    if (recv_buf[0] == '\r') {
+      continue;
     }
-
-    return input;
+    if (recv_buf[0] == '\n') {
+      break;
+    }
+    line.append(recv_buf, 1);
+  }
+  return line;
 }
