@@ -9,6 +9,12 @@
 #include<string>
 #include<memory>
 #include <functional> 
+#include <sstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/time.h>
+#include <arpa/inet.h>
+#include "UserManager.h"
 
 typedef struct command_t {
     int sender_id;
@@ -24,6 +30,16 @@ typedef struct command_t {
 
 class CommandExecutor{
     int input_fd;
+    UserManager& userManager;
+
+    std::set<int> ids_available;
+    std::map<int, int>& id_fd;
+    std::unordered_map<int, int>& fd_id;
+    std::unordered_map<int, std::string>& id_name;
+    std::set<std::string>& names;
+    std::unordered_map<int, std::unordered_map<std::string, std::string>>& id_env;
+    std::map<std::pair<int, int>, int>& user_pipe;
+
 
     bool isRedirectingToFile(command_t cmd);
     bool isEndOfCommand(command_t cmd);

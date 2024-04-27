@@ -15,10 +15,13 @@ std::vector< std::string> Parser::getTokenizedLine(std::string line){
 
 
 bool Parser::isPipeOrRedirect(std::string arg){
-    return (arg[0]=='|' || arg[0]=='!' || arg[0]=='>');
+    return (arg[0]=='|' || arg[0]=='!' || arg[0]=='>' || arg[0]=='<');
 }
 bool Parser::isRedirect(std::string arg){
-    return arg[0] == '>';
+    return arg[0] == '>' && arg.size() == 1;
+}
+bool Parser::isUserPipeOut(std::string arg){
+    return arg[0] == '>' && arg.size() > 1 ;
 }
 bool Parser::isPipe(std::string arg){
     return arg[0] == '|';
@@ -31,6 +34,9 @@ bool Parser::isPipeUpdatingCounter(std::string arg){
 }
 bool Parser::isNumberPipe(std::string argPipe){
     return argPipe.size() > 1;
+}
+bool Parser::isUserPipeIn(std::string arg){
+    return arg[0] == '<';
 }
 int Parser::getUserPipeReceicer(std::string argPipe){
     return stoi(argPipe.substr(1));

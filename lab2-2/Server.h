@@ -14,7 +14,7 @@
 #include <map>
 #include <sys/socket.h>
 #include <sys/select.h>
-#include <thread>
+#include "UserManager.h"
 
 #define MAX_USER_ID 30
 #define DEFAULT_USER_NAME "(no name)"
@@ -27,12 +27,15 @@ class Server{
         struct sockaddr_in serverAddr;
         int serverPort;
 
+        UserManager& userManager;
+
         std::set<int> ids_available;
-        std::map<int, int> id_fd; // Map of user ID to socket FD
-        std::unordered_map<int, int> fd_id; // Reverse of id_fd
-        std::unordered_map<int, std::string> id_name; // User ID to name mapping
-        std::set<std::string> names; // Set of names to check for uniqueness
-        std::unordered_map<int, std::unordered_map<std::string, std::string>> id_env; // Environment variables per user
+        std::map<int, int>& id_fd;
+        std::unordered_map<int, int>& fd_id;
+        std::unordered_map<int, std::string>& id_name;
+        std::set<std::string>& names;
+        std::unordered_map<int, std::unordered_map<std::string, std::string>>& id_env;
+        std::map<std::pair<int, int>, int>& user_pipe;
 
         fd_set readfds;
         int max_fd;

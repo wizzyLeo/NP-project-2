@@ -1,6 +1,6 @@
 #include "CommandExecutor.h"
 
-CommandExecutor::CommandExecutor(int clientFd): input_fd(clientFd) {;}
+CommandExecutor::CommandExecutor(int clientFd): input_fd(clientFd), userManager(UserManager::getInstance()),ids_available(userManager.getIdsAvailable()), id_fd(userManager.getIdFdMap()), fd_id(userManager.getFdIdMap()), id_name(userManager.getIdNameMap()), names(userManager.getNames()), id_env(userManager.getIdEnvMap()) , user_pipe(userManager.getUserPipeMap()){;}
 
 
 void CommandExecutor::setupChildIO(command_t& cmd){
@@ -18,6 +18,15 @@ void CommandExecutor::setupChildIO(command_t& cmd){
     }
 }
 
+std::string tcp2Address(int clientSocket){
+    struct sockaddr_in addr;
+    socklen_t addr_size = sizeof(struct sockaddr_in);
+    getpeername(clientSocket, (struct sockaddr *)&addr, &addr_size);
+    std::stringstream ss;
+    ss << inet_ntoa(addr.sin_addr) << ":" << ntohs(addr.sin_port);
+    return ss.str();
+}
+
 void CommandExecutor::execute(command_t &cmd) {
   if (cmd.args[0] == "exit") {
     close(input_fd);
@@ -33,6 +42,42 @@ void CommandExecutor::execute(command_t &cmd) {
     if (const char *env = getenv(cmd.args[1].c_str())) {
       std::cout << env << '\n';
     }
+    return;
+  }
+
+  if (cmd.args[0] == "yell") {
+    std::stringstream iss;
+    for(auto& arg : cmd.args){
+      iss << arg << " ";
+    }
+    for (const auto &[key, value] : fd_id) {
+      dprintf(key, "*** %s yelled ***: %s\n", id_name[cmd.sender_id].c_str(), iss.str().c_str());
+    }
+    return;
+  }
+  if (cmd.args[0] == "tell") {
+    int recv_id = std::stoi(cmd.args[1]);
+    std::stringstream iss;
+    for(auto& arg : cmd.args){
+      iss << arg << " ";
+    }
+    if (id_fd.count(recv_id) == 1) {
+      dprintf(id_fd[recv_id], "*** %s told you ***: %s\n", id_name[cmd.sender_id].c_str(), iss.str().c_str());
+    } else {
+      dprintf(cmd.fd_out, "*** Error: user #%d does not exist yet. ***\n", recv_id);
+    }
+    return;
+  }
+
+  if(cmd.args[0] == "who"){
+    std::stringstream ss;
+    ss.flush();
+    std::cout << "who\n";
+    for(const auto &[key, value] : id_fd){
+      ss << key << '\t' << id_name[key] << '\t' << tcp2Address(value) << '\t';
+      ss << "\n";
+    }
+    dprintf(input_fd, ss.str().c_str(), ss.str().size(), 0);
     return;
   }
 

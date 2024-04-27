@@ -1,11 +1,7 @@
 #include "Server.h"
 #include "Shell.h"
 
-Server::Server() : serverPort(PORT) {
-    for (int i = 1; i <= MAX_USER_ID; i++) {
-        ids_available.insert(i);
-    }
-
+Server::Server() : serverPort(PORT), userManager(UserManager::getInstance()), ids_available(userManager.getIdsAvailable()), id_fd(userManager.getIdFdMap()), fd_id(userManager.getFdIdMap()), id_name(userManager.getIdNameMap()), names(userManager.getNames()), id_env(userManager.getIdEnvMap()), user_pipe(userManager.getUserPipeMap()){
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         perror("Socket creation failed");
@@ -47,6 +43,7 @@ void set_nonblock(int socket) {
 
 
 void Server::acceptNewConnection(){
+
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
 
@@ -60,11 +57,10 @@ void Server::acceptNewConnection(){
     max_fd = std::max(max_fd, clientSocket);
 
     int user_id = *ids_available.begin();
-    ids_available.erase(user_id);
     id_fd[user_id] = clientSocket;
     fd_id[clientSocket] = user_id;
     id_name[user_id] = DEFAULT_USER_NAME;
-    id_env[user_id]["PATH"] = "bin:.";
+    // id_env[user_id]["PATH"] = "bin:.";
 
     std::cout << "New Client Socket FD: " << clientSocket << std::endl;
 
@@ -74,7 +70,7 @@ void Server::acceptNewConnection(){
     dprintf(clientSocket, "%s", welcomeMessage.c_str());
     dprintf(clientSocket, "%s", "% ");
 
-    broadcastMessage("Someone has entered the chat room.");
+    broadcastMessage("*** User \'" + id_name[user_id] + "\' entered from " + tcp2Address(clientSocket) + ". ***\n");
     set_nonblock(clientSocket);
 }
 
@@ -82,7 +78,6 @@ void Server::broadcastMessage(const std::string& message) {
     for (auto& pair : id_fd) {
         if (pair.second != serverSocket) { // Do not send to the server's own socket
             dprintf(pair.second, "%s\n", message.c_str());
-            printf("Broadcasting to fd %d\n", pair.second);
         }
     }
 }
@@ -105,12 +100,13 @@ void Server::start(){
 
         for(int fd = 0; fd <= max_fd; fd++){
             if(FD_ISSET(fd, &current_fds)){
-                std::cout << "Set fd: " << fd << std::endl;
+                // std::cout << "Set fd: " << fd << std::endl;
                 if(fd == serverSocket){
                     acceptNewConnection();
                 }else{
                     if(processRequest(fd)){
                         std::cout << "[Server] Exiting service for client " << tcp2Address(fd) << '\n';
+                        broadcastMessage("*** User \'" + id_name[fd_id[fd]] + "\' left. ***\n");
                         shutdown(fd, SHUT_RDWR);
                         close(fd);
                         FD_CLR(fd, &readfds);

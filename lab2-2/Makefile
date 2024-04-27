@@ -6,9 +6,9 @@ CXXFLAGS = -Wall -g -std=c++17
 TARGET = main
 
 # Source files
-SRCS = main.cpp Parser.cpp IOManager.cpp Shell.cpp CommandExecutor.cpp Server.cpp
+SRCS = main.cpp Parser.cpp IOManager.cpp Shell.cpp CommandExecutor.cpp Server.cpp UserManager.cpp
 
-HEADERS = Parser.h IOManager.h Shell.h CommandExecutor.h Server.h
+HEADERS = Parser.h IOManager.h Shell.h CommandExecutor.h Server.h UserManager.h
 
 # Object files (replace .cpp with .o)
 OBJS = $(SRCS:.cpp=.o)
